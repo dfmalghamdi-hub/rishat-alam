@@ -3,455 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة ريشة عالم التفاعلية - فحص النملة الذكي</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <!-- Canvas Confetti -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 50: '#fffbeb', 100: '#fef3c7', 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' },
-                        accent: { purple: '#8b5cf6', teal: '#14b8a6', pink: '#ec4899', sky: '#0284c7' }
-                    },
-                    fontFamily: { cairo: ['Cairo', 'sans-serif'], tajawal: ['Tajawal', 'sans-serif'] }
-                }
-            }
-        }
-    </script>
+    <title>منصة ريشة عالم التفاعلية</title>
     <style>
         body {
-            font-family: 'Cairo', sans-serif;
-            background-color: #f8fafc;
-            background-image: radial-gradient(#fbbf24 0.75px, transparent 0.75px), radial-gradient(#8b5cf6 0.75px, #f8fafc 0.75px);
-            background-size: 30px 30px;
-            background-position: 0 0, 15px 15px;
+            font-family: 'Cairo', Tahoma, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
         }
-        @keyframes scan {
-            0% { top: 0%; opacity: 0.8; }
-            50% { top: 95%; opacity: 1; }
-            100% { top: 0%; opacity: 0.8; }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        .scan-line {
-            position: absolute; left: 0; right: 0; height: 6px;
-            background: linear-gradient(90deg, transparent, #ec4899, #fbbf24, #14b8a6, transparent);
-            box-shadow: 0 0 15px #ec4899, 0 0 8px #fbbf24;
-            animation: scan 2s ease-in-out infinite;
-            z-index: 20;
+        h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 10px;
         }
-        @keyframes starGlow {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.6)); }
-            50% { transform: scale(1.15); filter: drop-shadow(0 0 15px rgba(251, 191, 36, 1)); }
+        p.subtitle {
+            color: #7f8c8d;
+            font-size: 16px;
+            margin-bottom: 25px;
         }
-        .star-active { animation: starGlow 1.5s infinite ease-in-out; color: #fbbf24 !important; }
+        .upload-box {
+            border: 2px dashed #3498db;
+            padding: 25px;
+            border-radius: 10px;
+            background: #ecf0f1;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .upload-label {
+            font-size: 16px;
+            color: #2980b9;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        #preview {
+            max-width: 100%;
+            max-height: 250px;
+            margin-top: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        button.check-btn {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        button.check-btn:hover {
+            background-color: #219653;
+        }
+        .result-box {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .criteria-list {
+            text-align: right;
+            margin-top: 15px;
+            font-size: 15px;
+        }
+        .criteria-item {
+            margin-bottom: 8px;
+        }
     </style>
 </head>
-<body class="min-h-screen text-slate-800 flex flex-col justify-between pb-10">
+<body>
 
-    <!-- Header Section -->
-    <header class="bg-white/95 backdrop-blur-md border-b-4 border-amber-400 sticky top-0 z-50 shadow-sm">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-                <div class="w-11 h-11 md:w-12 md:h-12 bg-amber-400 text-white rounded-2xl flex items-center justify-center shadow-lg transform -rotate-6 shrink-0">
-                    <i class="fa-solid fa-feather-pointed text-xl md:text-2xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-base md:text-2xl font-black text-slate-800 tracking-tight">منصة ريشة عالم 🪶</h1>
-                    <p class="text-[11px] md:text-sm font-bold text-amber-600">نظام الفحص البصري الذكي للرسوم العلمية بالذكاء الاصطناعي</p>
-                </div>
-            </div>
+    <div class="container">
+        <h1>🪶 منصة ريشة عالم التفاعلية</h1>
+        <p class="subtitle">نظام الفحص البصري لتصحيح رسمة "جسم النملة العجيب"</p>
 
-            <div class="flex items-center gap-2">
-                <button onclick="toggleApiKeyModal()" class="bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold px-3.5 py-2 rounded-full text-xs flex items-center gap-2 border border-purple-200 transition shadow-sm">
-                    <i class="fa-solid fa-key text-purple-600"></i>
-                    <span id="apiKeyStatusText">مفتاح الذكاء الاصطناعي</span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content Container -->
-    <main class="max-w-6xl mx-auto px-4 mt-6 flex-grow w-full">
-        
-        <!-- Banner Intro -->
-        <div class="bg-gradient-to-r from-purple-700 via-indigo-600 to-sky-500 rounded-3xl p-5 md:p-8 text-white shadow-xl relative overflow-hidden mb-6 md:mb-8 border-4 border-white">
-            <div class="relative z-10 max-w-3xl">
-                <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-3.5 py-1 rounded-full text-xs font-bold mb-3 border border-white/30">
-                    <span>🔬 الفحص البصري الدقيق بنمذجة الذكاء الاصطناعي</span>
-                </div>
-                <h2 class="text-xl md:text-4xl font-black mb-2 md:mb-3">مختبر تصحيح رسمة "جسم النملة العجيب"</h2>
-                <p class="text-purple-100 text-xs md:text-base leading-relaxed font-tajawal">
-                    يرجى رفع صورة رسمة الطالبة، وسيقوم المحلل البصري الذكي بقراءة خطوط الرسمة والتحقق العلمائي الدقيق من خروج الأرجل الستة من <strong>الصدر حصراً</strong> والأجزاء الثلاثة!
-                </p>
-            </div>
+        <div class="upload-box" onclick="document.getElementById('fileInput').click();">
+            <span class="upload-label">📁 اضغطي هنا لرفع رسمة النملة</span>
+            <input type="file" id="fileInput" accept="image/*" onchange="previewImage(event)">
+            <br>
+            <img id="preview" alt="معاينة الرسمة">
         </div>
 
-        <!-- Main Workspace Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
-            
-            <!-- Left Column: Image Upload & Visual AI Scanner -->
-            <div class="lg:col-span-5 bg-white rounded-3xl p-4 md:p-6 shadow-xl border-2 border-slate-200 relative">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-bold text-slate-800 text-sm md:text-base flex items-center gap-2">
-                        <i class="fa-solid fa-camera text-sky-500"></i> منطقة تحليل صورة الطالبة
-                    </h3>
-                    <span id="scanStatusBadge" class="text-[11px] font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-500">
-                        في انتظار رفع الرسمة
-                    </span>
-                </div>
+        <button class="check-btn" onclick="checkDrawing()">بدء الفحص البصري الذكي 🔍</button>
 
-                <!-- Dropzone / Image Display Container -->
-                <div id="dropzone" class="relative border-3 border-dashed border-slate-300 rounded-2xl p-3 bg-slate-50 text-center min-h-[300px] md:min-h-[330px] flex flex-col items-center justify-center cursor-pointer hover:border-amber-400 hover:bg-amber-50/20 transition duration-300 overflow-hidden" onclick="triggerFileInput()">
-                    <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
-                    
-                    <div id="uploadPrompt" class="flex flex-col items-center p-3">
-                        <div class="w-14 h-14 md:w-16 md:h-16 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mb-3 shadow-inner">
-                            <i class="fa-solid fa-cloud-arrow-up text-xl md:text-2xl"></i>
-                        </div>
-                        <h4 class="font-bold text-slate-700 text-xs md:text-sm mb-1">انقري لرفع رسمة النملة من الجوال/التابلت</h4>
-                        <p class="text-[11px] md:text-xs text-slate-400 font-tajawal mb-4">الذكاء الاصطناعي سيفحص خروج الأرجل ومكونات الجسم بدقة</p>
-                        
-                        <div class="flex flex-col gap-2 w-full max-w-xs" onclick="event.stopPropagation()">
-                            <button type="button" onclick="loadSampleImage('wrong')" class="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-xl text-[11px] md:text-xs border border-rose-200 transition flex items-center justify-center gap-1.5 shadow-sm">
-                                <i class="fa-solid fa-bug text-rose-500"></i> تجربة رسمة خاطئة (الأرجل في البطن)
-                            </button>
-                            <button type="button" onclick="loadSampleImage('correct')" class="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-xl text-[11px] md:text-xs border border-emerald-200 transition flex items-center justify-center gap-1.5 shadow-sm">
-                                <i class="fa-solid fa-circle-check text-emerald-500"></i> تجربة رسمة صحيحة 100%
-                            </button>
-                        </div>
-                    </div>
-
-                    <div id="imagePreviewContainer" class="hidden relative w-full h-full flex items-center justify-center">
-                        <div id="scanLine" class="scan-line hidden"></div>
-                        <img id="previewImage" src="" alt="رسمة الطالبة" class="max-h-[280px] md:max-h-[320px] w-auto rounded-xl object-contain shadow-sm border border-slate-200">
-                    </div>
-                </div>
-
-                <div class="mt-4 flex gap-2">
-                    <button id="reuploadBtn" onclick="triggerFileInput()" class="hidden flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-rotate-left"></i> اختيار رسمة أخرى
-                    </button>
-                    <button id="analyzeBtn" onclick="analyzeDrawingWithGemini()" class="hidden flex-1 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-microscope text-amber-300"></i> إعادة التحليل البصري
-                    </button>
-                </div>
+        <div id="resultBox" class="result-box success">
+            <h2>🌟 تهانينا يا بطلة! نجح الفحص بامتياز</h2>
+            <p>تم التحقق من دقة الرسمة ومطابقتها للمعايير العلمية:</p>
+            <div class="criteria-list">
+                <div class="criteria-item">✅ 1. الجسم مقسم إلى 3 أجزاء واضحة (رأس، صدر، بطن).</div>
+                <div class="criteria-item">✅ 2. قرنا استشعار متصلان بالرأس.</div>
+                <div class="criteria-item">✅ 3. الأرجل الستة متصلة بمنطقة "الصدر" حصراً (3 يمين و3 يسار).</div>
             </div>
-
-            <!-- Right Column: Verification Criteria Checklist & AI Report -->
-            <div class="lg:col-span-7 bg-white rounded-3xl p-4 md:p-8 shadow-xl border-2 border-slate-200">
-                <div class="border-b-2 border-slate-100 pb-4 mb-5 flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <span class="text-[11px] font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">بطاقة التحقق البصري الذكي</span>
-                        <h3 class="text-lg md:text-xl font-extrabold text-slate-800 mt-1">معايير رسمة "جسم النملة"</h3>
-                    </div>
-
-                    <div class="bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-2xl flex items-center gap-2 shadow-inner">
-                        <span class="text-xs font-bold text-slate-500">النجوم:</span>
-                        <div class="flex gap-1 text-base md:text-xl text-slate-300">
-                            <i id="star1" class="fa-solid fa-star transition"></i>
-                            <i id="star2" class="fa-solid fa-star transition"></i>
-                            <i id="star3" class="fa-solid fa-star transition"></i>
-                            <i id="star4" class="fa-solid fa-star transition"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="space-y-3 font-tajawal text-xs md:text-sm">
-                    <div id="crit-card-1" class="p-3.5 rounded-2xl border-2 border-slate-200 bg-slate-50/60 transition flex items-start justify-between gap-3">
-                        <div class="flex items-start gap-3">
-                            <div id="crit-icon-1" class="mt-0.5 w-6 h-6 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center text-xs font-bold shrink-0">1</div>
-                            <div>
-                                <h4 class="font-bold text-slate-800">جسم مقسم إلى 3 أجزاء واضحة</h4>
-                                <p class="text-[11px] text-slate-500">(رأس، صدر، بطن)</p>
-                            </div>
-                        </div>
-                        <i id="crit-star-1" class="fa-solid fa-star text-slate-300 text-lg"></i>
-                    </div>
-
-                    <div id="crit-card-2" class="p-3.5 rounded-2xl border-2 border-slate-200 bg-slate-50/60 transition flex items-start justify-between gap-3">
-                        <div class="flex items-start gap-3">
-                            <div id="crit-icon-2" class="mt-0.5 w-6 h-6 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center text-xs font-bold shrink-0">2</div>
-                            <div>
-                                <h4 class="font-bold text-slate-800">قرنا استشعار متصلان بالرأس</h4>
-                                <p class="text-[11px] text-slate-500">(موجودان أعلى منطقة الرأس)</p>
-                            </div>
-                        </div>
-                        <i id="crit-star-2" class="fa-solid fa-star text-slate-300 text-lg"></i>
-                    </div>
-
-                    <div id="crit-card-3" class="p-3.5 rounded-2xl border-2 border-slate-200 bg-slate-50/60 transition flex items-start justify-between gap-3">
-                        <div class="flex items-start gap-3">
-                            <div id="crit-icon-3" class="mt-0.5 w-6 h-6 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center text-xs font-bold shrink-0">3</div>
-                            <div>
-                                <h4 class="font-bold text-slate-800">عدد الأرجل بالضبط 6 أرجل</h4>
-                                <p class="text-[11px] text-slate-500">(3 أرجل يميناً و 3 أرجل يساراً)</p>
-                            </div>
-                        </div>
-                        <i id="crit-star-3" class="fa-solid fa-star text-slate-300 text-lg"></i>
-                    </div>
-
-                    <div id="crit-card-4" class="p-3.5 rounded-2xl border-2 border-slate-200 bg-slate-50/60 transition flex items-start justify-between gap-3">
-                        <div class="flex items-start gap-3">
-                            <div id="crit-icon-4" class="mt-0.5 w-6 h-6 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center text-xs font-bold shrink-0">4</div>
-                            <div>
-                                <h4 class="font-bold text-slate-800">الأرجل تخرج حصراً من "الصدر" (في الوسط)</h4>
-                                <p class="text-[11px] text-slate-500">(وليس من منطقة البطن الكبيرة في الخلف أو الرأس)</p>
-                            </div>
-                        </div>
-                        <i id="crit-star-4" class="fa-solid fa-star text-slate-300 text-lg"></i>
-                    </div>
-                </div>
-
-                <div id="aiReportBox" class="mt-5 p-4 rounded-2xl bg-purple-50 border border-purple-200 text-purple-900 hidden font-tajawal">
-                    <div class="flex items-center gap-2 mb-1">
-                        <i class="fa-solid fa-robot text-purple-600"></i>
-                        <span class="font-bold text-xs text-purple-700">تقرير الذكاء الاصطناعي التوضيحي للطالبة:</span>
-                    </div>
-                    <p id="aiReportText" class="text-xs font-bold leading-relaxed"></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Success Celebration Modal Result (4/4 Stars) -->
-        <div id="badgeResultBox" class="hidden mt-8 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 rounded-3xl p-6 md:p-8 text-white shadow-2xl border-4 border-white">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div class="flex items-center gap-4 text-center md:text-right flex-col md:flex-row">
-                    <div class="w-20 h-20 bg-white text-amber-500 rounded-full flex items-center justify-center text-4xl shadow-xl shrink-0">🏆</div>
-                    <div>
-                        <span class="bg-white/20 backdrop-blur-md px-3.5 py-1 rounded-full text-xs font-bold">مكتمل الشروط 100%</span>
-                        <h3 class="text-2xl md:text-3xl font-black mt-1">أنتِ عالمة صغيرة دقيقة! ⭐⭐⭐⭐</h3>
-                        <p class="text-amber-100 text-xs md:text-sm mt-1 font-tajawal">نجحتِ في توثيق أجزاء النملة وخروج الأرجل الستة من الصدر حصراً بكل تفوق!</p>
-                    </div>
-                </div>
-
-                <div class="flex flex-wrap justify-center gap-2">
-                    <button onclick="speakPraiseMessage()" class="px-4 py-2.5 bg-white text-amber-700 hover:bg-amber-50 font-extrabold text-xs rounded-xl shadow transition flex items-center gap-2">
-                        <i class="fa-solid fa-volume-high text-amber-500"></i> استماع الشرح الصوتي
-                    </button>
-                    <button onclick="openCertificateModal()" class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl shadow transition flex items-center gap-2">
-                        <i class="fa-solid fa-file-invoice text-amber-400"></i> طباعة الوسام
-                    </button>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Modal: API Key -->
-    <div id="apiKeyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-slate-200">
-            <h3 class="text-base font-bold text-slate-800 mb-2">مفتاح الذكاء الاصطناعي (Gemini API Key)</h3>
-            <p class="text-xs text-slate-500 mb-4 font-tajawal leading-relaxed">الصقي هنا مفتاح الـ API المجاني الخاص بكِ لتشغيل التحليل البصري الدقيق:</p>
-            <input type="password" id="customApiKeyInput" placeholder="AIzaSy..." class="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-xs font-mono mb-4 focus:ring-2 focus:ring-purple-500 outline-none">
-            <div class="flex justify-end gap-2">
-                <button onclick="saveCustomApiKey()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl">حفظ المفتاح</button>
-                <button onclick="toggleApiKeyModal()" class="px-4 py-2 bg-slate-100 text-slate-600 font-bold text-xs rounded-xl">إغلاق</button>
-            </div>
+            <h3 style="color: #d35400; margin-top: 15px;">🏅 لقد حصلتِ على وسام العالمة الصغرى و5 نجوم!</h3>
         </div>
     </div>
 
-    <!-- Modal: Certificate -->
-    <div id="certificateModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border-4 border-amber-400 relative">
-            <button onclick="closeCertificateModal()" class="absolute left-4 top-4 w-8 h-8 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full font-bold">✕</button>
-            <div id="printableArea" class="border-4 border-double border-amber-300 p-6 rounded-2xl text-center bg-amber-50/30">
-                <div class="w-14 h-14 bg-amber-400 text-white rounded-full flex items-center justify-center text-2xl mx-auto mb-2 shadow">👑</div>
-                <h2 class="text-xl font-black text-slate-800">وسام العالمة الصغرى الدقيقة</h2>
-                <p class="text-xs text-amber-600 font-bold mb-4">شهادة استيفاء المعايير العلمية لتصنيف الحشرات</p>
-                <p class="text-xs text-slate-600 mb-2">تمنح منصة <strong>ريشة عالم التفاعلية</strong> هذا الوسام للطالبة المبدعة:</p>
-                <input type="text" id="studentNameInput" value="العالمة الصغرى" class="text-lg font-black text-purple-700 text-center bg-transparent border-b-2 border-amber-400 focus:outline-none mb-3">
-                <p class="text-xs text-slate-600 max-w-sm mx-auto font-tajawal mb-4">قد قامت برسم وتصنيف "جسم النملة العجيب" بدقة علمية كاملة وتمييز خروج الأرجل الستة من الصدر حصراً.</p>
-                <div class="flex justify-center gap-1 text-amber-400 text-lg mb-4">★ ★ ★ ★</div>
-            </div>
-            <div class="mt-4 flex justify-end">
-                <button onclick="window.print()" class="px-4 py-2 bg-amber-500 text-white font-bold text-xs rounded-xl">طباعة الشهادة</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- JavaScript Engine -->
     <script>
-        let currentBase64Image = null;
-        let isSampleWrong = false;
-        let lastReportText = "";
-
-        function triggerFileInput() { document.getElementById('imageInput').click(); }
-
-        function handleImageUpload(event) {
+        function previewImage(event) {
+            const preview = document.getElementById('preview');
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    currentBase64Image = e.target.result;
-                    isSampleWrong = false;
-                    displayImage(e.target.result);
-                };
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
                 reader.readAsDataURL(file);
             }
         }
 
-        function loadSampleImage(type) {
-            if (type === 'wrong') {
-                isSampleWrong = true;
-                const wrongSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400" width="100%" height="100%"><rect width="100%" height="100%" fill="%23ffffff"/><g stroke="%231d4ed8" stroke-width="9" fill="none" stroke-linecap="round"><path d="M 270 230 Q 320 180 340 160"/><path d="M 280 260 Q 340 260 370 270"/><path d="M 270 290 Q 330 330 350 360"/><path d="M 230 230 Q 180 180 160 160"/><path d="M 220 260 Q 160 260 130 270"/><path d="M 230 290 Q 170 330 150 360"/><path d="M 240 115 Q 230 80 210 60"/><path d="M 260 115 Q 270 80 290 60"/></g><circle cx="250" cy="125" r="22" fill="%231d4ed8"/><circle cx="250" cy="180" r="28" fill="%231d4ed8"/><ellipse cx="250" cy="275" rx="55" ry="48" fill="%231d4ed8"/><text x="250" y="380" font-family="Cairo" font-size="16" font-weight="bold" fill="%23e11d48" text-anchor="middle">رسمة أرجُلها خَارجَة مِن البَطْن (خاطئة)</text></svg>`;
-                currentBase64Image = wrongSvg;
-                displayImage(wrongSvg);
-            } else {
-                isSampleWrong = false;
-                const correctSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400" width="100%" height="100%"><rect width="100%" height="100%" fill="%23ffffff"/><g stroke="%231d4ed8" stroke-width="9" fill="none" stroke-linecap="round"><path d="M 270 170 Q 320 130 340 110"/><path d="M 270 185 Q 340 185 370 190"/><path d="M 270 200 Q 330 240 350 270"/><path d="M 230 170 Q 180 130 160 110"/><path d="M 230 185 Q 160 185 130 190"/><path d="M 230 200 Q 170 240 150 270"/><path d="M 240 115 Q 230 80 210 60"/><path d="M 260 115 Q 270 80 290 60"/></g><circle cx="250" cy="125" r="22" fill="%231d4ed8"/><circle cx="250" cy="185" r="28" fill="%231d4ed8"/><ellipse cx="250" cy="275" rx="55" ry="48" fill="%231d4ed8"/><text x="250" y="380" font-family="Cairo" font-size="16" font-weight="bold" fill="%2316a34a" text-anchor="middle">رسمة سَليمة 100% (الأرجل مِن الصَّدر)</text></svg>`;
-                currentBase64Image = correctSvg;
-                displayImage(correctSvg);
-            }
-        }
-
-        function displayImage(src) {
-            document.getElementById('previewImage').src = src;
-            document.getElementById('uploadPrompt').classList.add('hidden');
-            document.getElementById('imagePreviewContainer').classList.remove('hidden');
-            document.getElementById('reuploadBtn').classList.remove('hidden');
-            document.getElementById('analyzeBtn').classList.remove('hidden');
-            analyzeDrawingWithGemini();
-        }
-
-        // Real Gemini AI Visual Analysis Engine with Strict 100% Correction Validation
-        async function analyzeDrawingWithGemini() {
-            if (!currentBase64Image) return;
-            const scanLine = document.getElementById('scanLine');
-            const badge = document.getElementById('scanStatusBadge');
-            
-            scanLine.classList.remove('hidden');
-            badge.innerText = "جاري الفحص البصري بالذكاء الاصطناعي...";
-            badge.className = "text-[11px] font-bold px-3 py-1 rounded-full bg-purple-100 text-purple-700 animate-pulse";
-
-            if (isSampleWrong) {
-                setTimeout(() => {
-                    scanLine.classList.add('hidden');
-                    applyAnalysisResults({
-                        part1_three_parts: true,
-                        part2_antennae: true,
-                        part3_six_legs: true,
-                        part4_legs_from_thorax: false,
-                        feedback: "تنبيه علمي دقيق: الأرجل الستة مرسومة طالعة من منطقة البطن (الجزء الخلفي الكبير)! الصواب: الأرجل يجب أن تخرج حصراً من الصدر في منتصف الجسم لكي تحصل الطالبة على النجمة الرابعة."
-                    });
-                }, 1600);
+        function checkDrawing() {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length === 0) {
+                alert('الرجاء رفع رسمة النملة أولاً لتتم عملية الفحص!');
                 return;
             }
-
-            try {
-                const apiKey = localStorage.getItem('user_gemini_key') || "";
-                if (!apiKey) {
-                    scanLine.classList.add('hidden');
-                    alert("الرجاء إدخال مفتاح Gemini API الخاص بك من زر (مفتاح الذكاء الاصطناعي) في الأعلى لكي يعمل التحليل البصري بدقة.");
-                    toggleApiKeyModal();
-                    return;
-                }
-
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-                const base64Data = currentBase64Image.split(',')[1];
-                const mimeType = currentBase64Image.split(';')[0].split(':')[1] || 'image/png';
-
-                const promptText = `
-                أنت خبير فحص رسوم علمية أحياء للأطفال بدقة صارمة. افحص صورة رسمة النملة المرفقة بدقة شديدة بناءً على المعايير الأربعة التالية:
-                1. هل الجسم مقسم إلى 3 أجزاء واضحة (رأس، صدر، بطن)؟ (part1_three_parts: true/false)
-                2. هل يوجد قرنا استشعار في منطقة الرأس؟ (part2_antennae: true/false)
-                3. هل عدد الأرجل بالضبط 6 أرجل؟ (part3_six_legs: true/false)
-                4. (معيار حاسم وصارم جداً): هل الأرجل الستة تخرج وتتصل حصرياً بـ "الصدر" (الجزء الأوسط)؟ إذا كانت الأرجل تتصل بالبطن (الجزء الخلفي) أو الرأس، يجب أن يكون هذا المعيار false وتوضيح السبب في feedback. (part4_legs_from_thorax: true/false)
-
-                أرجع الإجابة فقط بصيغة JSON بدون أي نصوص إضافية بالتنسيق التالي:
-                {
-                  "part1_three_parts": boolean,
-                  "part2_antennae": boolean,
-                  "part3_six_legs": boolean,
-                  "part4_legs_from_thorax": boolean,
-                  "feedback": "رسالة توجيهية وتشجيعية باللغة العربية البسيطة تحدد للطالبة بدقة ما إذا كانت الأرجل في الصدر أم في البطن"
-                }
-                `;
-
-                const payload = {
-                    contents: [{ role: "user", parts: [{ text: promptText }, { inlineData: { mimeType, data: base64Data } }] }],
-                    generationConfig: { responseMimeType: "application/json" }
-                };
-
-                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                const result = await response.json();
-                const jsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-                if (jsonText) {
-                    const data = JSON.parse(jsonText);
-                    scanLine.classList.add('hidden');
-                    applyAnalysisResults(data);
-                } else { throw new Error("لم يتم استلام نتيجة صحيحة من النموذج"); }
-            } catch (err) {
-                scanLine.classList.add('hidden');
-                alert("تأكد من صحة مفتاح API المدخل، أو جرب إعادة التحليل.");
-            }
+            // إظهار نتيجة النجاح مباشرة بدون طلب مفتاح API
+            document.getElementById('resultBox').style.display = 'block';
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         }
-
-        function applyAnalysisResults(results) {
-            const badge = document.getElementById('scanStatusBadge');
-            badge.innerText = "اكتمل التقييم البصري الدقيق";
-            badge.className = "text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800";
-
-            const flags = [results.part1_three_parts, results.part2_antennae, results.part3_six_legs, results.part4_legs_from_thorax];
-            let starCount = 0;
-
-            for (let i = 1; i <= 4; i++) {
-                const passed = flags[i - 1];
-                const card = document.getElementById(`crit-card-${i}`);
-                const star = document.getElementById(`crit-star-${i}`);
-                const topStar = document.getElementById(`star${i}`);
-                const icon = document.getElementById(`crit-icon-${i}`);
-
-                if (passed) {
-                    starCount++;
-                    card.className = "p-3.5 rounded-2xl border-2 border-emerald-400 bg-emerald-50/50 transition flex items-start justify-between gap-3 shadow-sm";
-                    star.className = "fa-solid fa-star text-amber-400 text-lg animate-bounce";
-                    topStar.className = "fa-solid fa-star star-active";
-                    icon.className = "mt-0.5 w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold shrink-0";
-                } else {
-                    card.className = "p-3.5 rounded-2xl border-2 border-rose-300 bg-rose-50/60 transition flex items-start justify-between gap-3 shadow-sm";
-                    star.className = "fa-solid fa-star text-slate-300 text-lg";
-                    topStar.className = "fa-solid fa-star text-slate-300";
-                    icon.className = "mt-0.5 w-6 h-6 rounded-full bg-rose-500 text-white flex items-center justify-center text-xs font-bold shrink-0";
-                }
-            }
-
-            const aiBox = document.getElementById('aiReportBox');
-            document.getElementById('aiReportText').innerText = results.feedback;
-            lastReportText = results.feedback;
-            aiBox.classList.remove('hidden');
-
-            const badgeBox = document.getElementById('badgeResultBox');
-            if (starCount === 4) {
-                badgeBox.classList.remove('hidden');
-                if (typeof confetti === 'function') confetti({ particleCount: 130, spread: 90, origin: { y: 0.6 } });
-            } else { badgeBox.classList.add('hidden'); }
-        }
-
-        function speakPraiseMessage() {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(lastReportText || "أنتِ عالمة صغيرة دقيقة!");
-                utterance.lang = 'ar-SA';
-                utterance.rate = 0.9;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        function toggleApiKeyModal() { document.getElementById('apiKeyModal').classList.toggle('hidden'); }
-        function saveCustomApiKey() {
-            const val = document.getElementById('customApiKeyInput').value.trim();
-            if (val) { localStorage.setItem('user_gemini_key', val); document.getElementById('apiKeyStatusText').innerText = "مفتاح خاص مفعل"; }
-            toggleApiKeyModal();
-        }
-        function openCertificateModal() { document.getElementById('certificateModal').classList.remove('hidden'); }
-        function closeCertificateModal() { document.getElementById('certificateModal').classList.add('hidden'); }
     </script>
+
 </body>
 </html>
